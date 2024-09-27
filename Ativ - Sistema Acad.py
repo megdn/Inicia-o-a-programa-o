@@ -3,18 +3,19 @@ alunos = {}
 
 # Criando a função “situacao_aluno” para calcular média das notas, porcentagem de frequência, se o aluno tem muitas faltas e se o aluno foi aprovado ou reprovado. criando as variáveis para calcular essas situações.
 def situacao_aluno(notas, frequencia, carga_horaria):
+    if len(notas) > 0:
 
-    # Calculando a média das notas do aluno.
-    media = sum(notas) / len(notas) if notas else 0
+# Calculando a média das notas do aluno, verificando se a lista de notas está vazia
+        media = sum(notas) / len(notas) 
+    else:
+        media = 0
 
-    # Calculando a porcentagem de frequência.
+# Calculando a porcentagem de frequência.
     porcentagem_frequencia = (frequencia / carga_horaria) * 100
 
-    # Verificando se o aluno foi reprovado por falta de acordo com os 75% solicitado na questão.
+ # Verificando se o aluno foi reprovado por falta de acordo com os 75% solicitado na questão
     if porcentagem_frequencia < 75:
         return "Reprovado por Falta"
-
-    # Verificando se o aluno foi aprovado ou reprovado por nota (média).
     elif media >= 7:
         return "Aprovado"
     else:
@@ -22,67 +23,76 @@ def situacao_aluno(notas, frequencia, carga_horaria):
 
 # Função para adicionar um aluno
 def adicionar_aluno(nome):
-
-    # Adicionando o aluno ao dicionário com notas (dentro de uma lista) e frequência iniciais.
     alunos[nome] = {"notas": [], "frequencia": 0}
+    print(f"Aluno {nome} adicionado com sucesso!")
 
-# Função para editar o nome do aluno, caso seja necessário.
+# Função para editar o nome do aluno
 def editar_aluno(nome_antigo, nome_novo):
-
-    # Verifica se o aluno existe
     if nome_antigo in alunos:
+        alunos[nome_novo] = alunos[nome_antigo]
+        del alunos[nome_antigo]
+        print(f"Aluno {nome_antigo} editado para {nome_novo} com sucesso!")
+    else:
+        print(f"Aluno {nome_antigo} não encontrado!")
 
-        # Transferindo informações para o novo nome (utilizando o método pop remover o nome antigo do aluno e substituir pelo nome novo).
-        alunos[nome_novo] = alunos.pop(nome_antigo)
-
-# Função para remover o nome de um aluno.
+# Função para remover um aluno
 def remover_aluno(nome):
-
-    # Remover o aluno, se existir.
     if nome in alunos:
         del alunos[nome]
+        print(f"Aluno {nome} removido com sucesso!")
+    else:
+        print(f"Aluno {nome} não encontrado!")
 
-# Função para adicionar notas.
+# Função para adicionar notas. O código verifica se o aluno já possui 4 notas, se já existir ele não permite inserir mais notas. Após esta verificação, se aprovada, é utilizado o método “.extend” para inserir a nota.
 def adicionar_notas(nome, notas):
+    if nome in alunos:
+        if len(alunos[nome]["notas"]) < 4:
+            alunos[nome]["notas"].extend(notas)
+            print(f"Notas adicionadas ao aluno {nome} com sucesso!")
+        else:
+            print(f"O aluno {nome} já possui 4 notas.")
+    else:
+        print(f"Aluno {nome} não encontrado!")
 
-    # Adiciona até 4 notas ao aluno existente, assim como pedido na atividade.
-    if nome in alunos and len(alunos[nome]["notas"]) < 4:
-        alunos[nome]["notas"].extend(notas)
-
-# Função para adicionar frequência.
+# Função para adicionar frequência. Caso o aluno seja encontrado, será inserido a quantidade de aulas que o aluno esteve presente.
 def adicionar_frequencia(nome, aulas):
-
-    # Adicionando a frequência ao aluno indicado.
     if nome in alunos:
         alunos[nome]["frequencia"] += aulas
+        print(f"Frequência adicionada ao aluno {nome} com sucesso!")
+    else:
+        print(f"Aluno {nome} não encontrado!")
 
-# Função para imprimir relatório geral.
+# Função para imprimir relatório geral. Primeiro verifica se existe aluno inseridos. Se houver, serão listados os alunos e suas respectivas frequências e situação (aprovado ou reprovado). 
 def imprimir_relatorio(carga_horaria):
-
-    # Imprime cada aluno com suas informações.
-    for nome, info in alunos.items():
+    if not alunos:
+        print("Nenhum aluno cadastrado.")
+        return
+    for nome in alunos:
+        info = alunos[nome]
         situacao = situacao_aluno(info["notas"], info["frequencia"], carga_horaria)
-
-        # Calculando a média e printando.
-        media = sum(info["notas"]) / len(info["notas"]) if info["notas"] else 0
+        #somando os elementos da lista de notas / tamanho da lista (quantidade de notas inseridas), para fazer a média
+        media = sum(info["notas"]) / len(info["notas"]) if len(info["notas"]) > 0 else 0
         print(f"{nome} - nota: {media:.1f} / frequência: {info['frequencia']} aulas - ({situacao})")
 
-# Função para imprimir relatório específica (filtro).
+# Função para imprimir relatório filtrado
 def imprimir_relatorio_filtrado(carga_horaria, filtro):
-
-    # Imprimindo apenas os alunos com a situação filtrada
-    for nome, info in alunos.items():
+    #Esta variável será usada para verificar se pelo menos um aluno que corresponde ao filtro
+    encontrado = False
+    for nome in alunos:
+        info = alunos[nome]
         situacao = situacao_aluno(info["notas"], info["frequencia"], carga_horaria)
         if situacao == filtro:
-
-            # Calcula a média para exibição
-            media = sum(info["notas"]) / len(info["notas"]) if info["notas"] else 0
+            encontrado = True
+            media = sum(info["notas"]) / len(info["notas"]) if len(info["notas"]) > 0 else 0
             print(f"{nome} - nota: {media:.1f} / frequência: {info['frequencia']} aulas - ({situacao})")
+    if not encontrado:
+        print(f"Nenhum aluno encontrado com a situação '{filtro}'.")
 
-# Solicitando a carga horária da disciplina (primeira mensagem que será solicitada ao usuário.
-carga_horaria = int(input("Informe a carga horária da disciplina: "))
+# Solicitando a carga horária da disciplina. Será a primeira mensagem que o usuário verá na tela.
+print("Sabendo que a carga horária é dada em dias.")
+carga_horaria = int(input("Informe a carga horária: "))
 
-# Menu principal do sistema (loop principal).
+# Menu principal do sistema
 while True:
     print("\nMenu:")
     print("1. Adicionar Aluno")
@@ -94,49 +104,46 @@ while True:
     print("7. Imprimir Relatório Filtrado")
     print("0. Sair")
 
-    # Solicitando uma opção ao usuário.
     opcao = input("Escolha uma opção: ")
 
-    if opcao == '1':  # Adiciona o Aluno
+    if opcao == '1':
         nome = input("Informe o nome do aluno: ")
         adicionar_aluno(nome)
-        print(f"Aluno {nome} adicionado com sucesso!")
 
-    elif opcao == '2':  # Edita o nome do Aluno
+    elif opcao == '2':
         nome_antigo = input("Informe o nome do aluno a ser editado: ")
         nome_novo = input("Informe o novo nome do aluno: ")
         editar_aluno(nome_antigo, nome_novo)
-        print(f"Aluno {nome_antigo} editado para {nome_novo} com sucesso!")
 
-    elif opcao == '3':  # Remove um Aluno
+    elif opcao == '3':
         nome = input("Informe o nome do aluno a ser removido: ")
         remover_aluno(nome)
-        print(f"Aluno {nome} removido com sucesso!")
 
-    elif opcao == '4':  # Adiciona as Notas
+    #As notas do aluno são inseridas separadas por espaço e com o método ".split" são separadas como elementos de uma lista.
+    #Utilizei a função "map()" para aplicar a função "float" a cada item da lista criada pelo ".split".
+    #Para converter o resultado do "map" para uma string utilizei a função "list".
+    elif opcao == '4':
         nome = input("Informe o nome do aluno: ")
         notas = list(map(float, input("Informe as notas separadas por espaço: ").split()))
-        adicionar_notas(nome, notas[:4])  # Adiciona apenas até 4 notas
-        print(f"Notas adicionadas ao aluno {nome} com sucesso!")
+        adicionar_notas(nome, notas[:4])  # Adiciona até 4 notas como solicitado.
 
-    elif opcao == '5':  # Adiciona Frequência
+    elif opcao == '5':
         nome = input("Informe o nome do aluno: ")
         aulas = int(input("Informe a quantidade de aulas frequentadas: "))
         adicionar_frequencia(nome, aulas)
-        print(f"Frequência adicionada ao aluno {nome} com sucesso!")
 
-    elif opcao == '6':  # Imprime Relatório Geral
+    elif opcao == '6':
         print("\nRelatório Geral:")
         imprimir_relatorio(carga_horaria)
 
-    elif opcao == '7':  # Imprime Relatório Específico/Filtrado
+    elif opcao == '7':
         situacao_filtro = input("Informe a situação para filtrar (Aprovado, Reprovado por Falta, Reprovado por Nota): ")
         print("\nRelatório Filtrado:")
         imprimir_relatorio_filtrado(carga_horaria, situacao_filtro)
 
-    elif opcao == '0':  # Sair
+    elif opcao == '0':
         print("Saindo do sistema...")
         break
 
-    else:  # Em caso de opção inválida
+    else:
         print("Opção inválida! Favor, escolher uma das opções disponíveis.")
